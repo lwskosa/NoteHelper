@@ -560,11 +560,13 @@ try {
 
     function copyAllBookmarks() {
         var tempArray = []
+        var padAmount = vid.duration > 3599 ? 17 : 13
         for (let bookmark of notesArray) {
             if (bookmark.isClip) {
                 tempArray.push(`(${bookmark.startText}-${bookmark.endText}) - ${bookmark.bookmarkText} `)
             } else {
-                tempArray.push(`(${bookmark.startText}) - ${bookmark.bookmarkText} `)
+                var timeCode = `(${bookmark.startText})`
+                tempArray.push(`${timeCode.padStart(padAmount)} - ${bookmark.bookmarkText} `)
             }
         }
         getVideoObject().pause()
@@ -593,7 +595,7 @@ try {
             copyClipButton.disabled = true
         } else if ((marker.startText == '-' && marker.startValue == 0) || (marker.endText == '-' && marker.endValue == 0)) {
             addClipBookmark.disabled = true
-            copyClipButton.disabled = true
+
         } else if ((marker.startText == '-' && marker.startValue == -1) || (marker.endText == '-' && marker.endValue == -1)) {
             addClipBookmark.disabled = true
             copyClipButton.disabled = true
@@ -602,6 +604,14 @@ try {
             addClipBookmark.innerHTML = `${clipLabel}<br>(Marker)`
             copyClipButton.disabled = false
         }
+
+        if (isNaN(vid.duration)) {
+            copyBookmarksButton.disabled = true
+
+        } else {
+            copyBookmarksButton.disabled = false
+        }
+
         if (marker.timestampValue == -1 || marker.timestampText == errorMSG) {
             addTimestampBookmark.disabled = true
 
