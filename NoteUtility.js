@@ -370,7 +370,7 @@ try {
 
     function copyClip(addNote) {
         updateClipLabel()
-        getVideoObject().pause()
+        vid.pause()
         if (addNote) {
             var note = setNote()
             navigator.clipboard.writeText(`(${marker.startText}-${marker.endText}) - ${note} `)
@@ -381,7 +381,7 @@ try {
 
     function copyTimestamp(addNote) {
         updateClipLabel()
-        getVideoObject().pause()
+        vid.pause()
         if (addNote) {
             var note = setNote()
             navigator.clipboard.writeText(`(${marker.timestampText}) - ${note} `)
@@ -393,8 +393,8 @@ try {
 
     //#region FUNCTIONS - BOOKMARKS
     function addBookmark(bookmarkType) {
-        if (getVideoObject().currentTime > 0) {
-            getVideoObject().pause()
+        if (vid.currentTime > 0) {
+            vid.pause()
             var note = setNote()
         } else {
             return
@@ -413,7 +413,6 @@ try {
                 break
 
             case 1:
-                // notesArray.push(new Note(getTimeStamp(), getVideoObject().currentTime, getTimeStamp(), getVideoObject().currentTime, note, false))
                 if (marker.timestampText == errorMSG) {
                     marker.timestampText = '0'
                     marker.timestampValue = 0.0
@@ -422,7 +421,7 @@ try {
                 break
             case 2:
 
-                notesArray.push(new Note(getTimeStamp(), getVideoObject().currentTime, getTimeStamp(), getVideoObject().currentTime, note, false))
+                notesArray.push(new Note(getTimeStamp(), vid.currentTime, getTimeStamp(), vid.currentTime, note, false))
                 break
             default:
                 alert(`Something went wrong!`)
@@ -457,14 +456,14 @@ try {
                     startEntryButton.className = `entrybutton startborder textbold`
                     startEntryButton.innerHTML = note.startText
                     startEntryButton.value = note.startValue
-                    startEntryButton.onclick = function() { jumpToTimestamp(note) }
+                    startEntryButton.onclick = function() { jumpToTimestamp(note, true) }
                     startEntryButton.ondblclick = function() { copyNote(note) }
 
                     var endEntryButton = document.createElement('button')
                     endEntryButton.className = `entrybutton endborder textbold`
                     endEntryButton.innerHTML = note.endText
                     endEntryButton.value = note.endValue
-                    endEntryButton.onclick = function() { jumpToTimestamp(note) }
+                    endEntryButton.onclick = function() { jumpToTimestamp(note, false) }
                     endEntryButton.ondblclick = function() { copyNote(note) }
 
                     var entryText = document.createElement('span')
@@ -483,7 +482,7 @@ try {
                     entryButton.className = `entrybutton fullborder textbold`
                     entryButton.innerHTML = note.startText
                     entryButton.value = note.startValue
-                    entryButton.onclick = function() { jumpToTimestamp(note) }
+                    entryButton.onclick = function() { jumpToTimestamp(note, true) }
                     entryButton.ondblclick = function() { copyNote(note) }
 
                     var entryText = document.createElement('span')
@@ -543,15 +542,19 @@ try {
     }
 
     function jumpToTime(timecode, copyEntry) {
-        getVideoObject().currentTime = timecode
+        vid.currentTime = timecode
         if (copyEntry) {
             navigator.clipboard.writeText(`(${marker.timestampText}) `)
         }
     }
 
-    function jumpToTimestamp(note) {
-        getVideoObject().currentTime = note.startValue
-        getVideoObject().play()
+    function jumpToTimestamp(note, isStart) {
+        if (isStart) {
+            vid.currentTime = note.startValue
+        } else {
+            vid.currentTime = note.endValue
+        }
+        vid.play()
     }
 
     function copyNote(note) {
@@ -569,7 +572,7 @@ try {
                 tempArray.push(`${timeCode.padStart(padAmount)} - ${bookmark.bookmarkText} `)
             }
         }
-        getVideoObject().pause()
+        vid.pause()
         navigator.clipboard.writeText(`${tempArray.join('\n')}\n`)
     }
 
@@ -607,7 +610,6 @@ try {
 
         if (isNaN(vid.duration)) {
             copyBookmarksButton.disabled = true
-
         } else {
             copyBookmarksButton.disabled = false
         }
@@ -619,15 +621,14 @@ try {
         } else {
             addTimestampBookmark.disabled = false
             copyTimestampButton.disabled = false
-
         }
-        if (getVideoObject().currentTime == 0) {
+
+        if (vid.currentTime == 0) {
             addCurrentTimeBookmark.innerHTML = `${timestampLabel}<br>(-)`
         } else {
             addCurrentTimeBookmark.disabled = false
             addCurrentTimeBookmark.innerHTML = `${timestampLabel}<br>(Now)`
         }
-
     }
 
     function getVideoObject() {
@@ -665,6 +666,7 @@ try {
         return document.querySelector('video')
     }
     //#endregion
+
     cleanUp()
         // Create Style
     document.head.appendChild(sStyle)
